@@ -1,12 +1,11 @@
 # Flask App Deployment
 
-This is a simple Flask app configured for deployment on a DigitalOcean droplet using Gunicorn and Nginx.
+This is a simple Flask app configured for deployment on a DigitalOcean droplet using Nginx.
 
 ## Files
 
 - `app.py`: The main Flask application
 - `requirements.txt`: Python dependencies
-- `gunicorn_config.py`: Gunicorn configuration
 - `flask_app.service`: Systemd service file for running the app
 
 ## Local Setup
@@ -15,7 +14,7 @@ This is a simple Flask app configured for deployment on a DigitalOcean droplet u
 2. Create a virtual environment: `python3 -m venv venv`
 3. Activate the virtual environment: `source venv/bin/activate`
 4. Install dependencies: `pip install -r requirements.txt`
-5. Run the app locally: `python app.py`
+5. Run the app locally: `flask run --host=127.0.0.1 --port=8000`
 
 ## Droplet Deployment Steps
 
@@ -84,8 +83,9 @@ This is a simple Flask app configured for deployment on a DigitalOcean droplet u
         server_name your_domain.com;
 
         location / {
-            include proxy_params;
-            proxy_pass http://unix:/home/your_username/flask-app/flask_app.sock;
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
         }
     }
     ```
@@ -104,3 +104,5 @@ This is a simple Flask app configured for deployment on a DigitalOcean droplet u
     ```
 
 Your Flask app should now be running on your DigitalOcean droplet and accessible via your domain name or the droplet's IP address.
+
+Note: This setup uses Flask's built-in development server, which is not recommended for production use. For a production environment, consider using a WSGI server like Gunicorn or uWSGI for better performance and reliability.
